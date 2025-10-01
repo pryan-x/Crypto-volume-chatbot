@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Crypto Volume Chatbot
 
-## Getting Started
+AI-powered chatbot that streams real-time cryptocurrency trading volume data from Binance using Next.js 15, React Server Components, and Google Gemini.
 
-First, run the development server:
+## Features
 
+- **Conversational AI**: Chat with Google Gemini AI
+- **Real-time Crypto Data**: Fetch live 24h trading volumes from Binance
+- **Streaming UI**: Progressive rendering with React Server Components
+- **Supported Cryptocurrencies**: Bitcoin, Ethereum, Solana, XRP, Cardano, Dogecoin, and more
+
+## Tech Stack
+
+- **Next.js 15** - React framework with App Router
+- **React Server Components (RSC)** - Server-side streaming components
+- **Google Gemini AI** - LLM for conversational responses
+- **Binance API** - Real-time cryptocurrency data
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+
+## Prerequisites
+
+- Node.js 18+ 
+- Google Gemini API key (free tier available)
+
+## Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/pryan-x/Crypto-volume-chatbot.git
+cd Crypto-volume-chatbot
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Create `.env.local` file in the root directory:
+```bash
+GOOGLE_GENERATIVE_AI_API_KEY=your_api_key_here
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Run the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+5. Open [http://localhost:3000](http://localhost:3000)
 
-To learn more about Next.js, take a look at the following resources:
+## Usage
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Query crypto volumes:**
+- "What's the volume of Bitcoin?"
+- "Show me Ethereum volume"
+- "Get SOL volume"
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**General chat:**
+- Ask any question and get AI-powered responses
 
-## Deploy on Vercel
+## How It Works
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### LLM Integration
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The project uses **React Server Components (RSC)** for streaming AI responses:
+
+1. **User Input**: Message sent to server action (`continueConversation`)
+2. **Pattern Detection**: Checks for "volume" or "binance" keywords
+3. **Route Decision**:
+   - **Crypto query** → Calls Binance API, streams custom UI components
+   - **General chat** → Streams text from Google Gemini AI
+
+4. **Streaming Response**: Uses `streamText()` from Vercel AI SDK to stream responses token-by-token
+5. **Progressive UI**: `createStreamableUI()` updates the interface in real-time as data arrives
+
+```typescript
+// Server action that streams responses
+const result = streamText({
+  model: google('gemini-2.5-flash'),
+  messages: [...history.get(), { role: 'user', content: input }],
+});
+
+// Stream each token as it arrives
+for await (const delta of result.textStream) {
+  fullText += delta;
+  reply.update(<p>{fullText}</p>);
+}
+```
+
+### Architecture
+
+- **`src/app/page.tsx`**: Client component for UI and user interaction
+- **`src/app/actions.tsx`**: Server actions for AI and API calls
+- **`src/app/ai.tsx`**: AI provider configuration with state management
+- **`src/app/layout.tsx`**: Root layout with AI context wrapper
+
+
+## Dependencies
+
+```json
+{
+  "ai": "^5.0.59",
+  "@ai-sdk/google": "^2.0.42",
+  "@ai-sdk/rsc": "^1.0.59",
+  "next": "15.5.4",
+  "react": "19.1.0",
+  "zod": "^4.1.11"
+}
+```
+
+## API Keys
+
+- **Binance API**: Public endpoints, no key required for market data
+- **Google Gemini**: Free tier available at [aistudio.google.com](https://aistudio.google.com/)
+
+## License
+
+MIT
