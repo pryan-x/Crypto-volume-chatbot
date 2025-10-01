@@ -118,7 +118,12 @@ function extractSymbol(input: string): string | null {
 }
 
 // Function to fetch Binance volume with streaming UI
-async function fetchBinanceVolume(symbol: string, reply: any, history: any, input: string) {
+async function fetchBinanceVolume(
+  symbol: string, 
+  reply: ReturnType<typeof createStreamableUI>, 
+  history: ReturnType<typeof getMutableAIState>, 
+  input: string
+) {
   // Show loading spinner
   reply.update(
     <article className="p-4 bg-blue-50 rounded-lg border border-blue-200">
